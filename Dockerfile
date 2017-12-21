@@ -38,6 +38,8 @@ RUN groupadd ftpgroup
 RUN useradd -g ftpgroup -d /home/ftpusers -s /dev/null ftpuser
 
 ENV PUBLICHOST ftp.foo.com
+ENV FTP_USER dev
+ENV FTP_PASSWORD dev
 
 VOLUME ["/home/ftpusers", "/etc/pure-ftpd"]
 
@@ -47,7 +49,9 @@ RUN cd /etc/pure-ftpd/conf/ && \
 	echo "no" | tee AllowAnonymousFXP AllowDotFiles AllowUserFXP AnonymousCanCreateDirs AnonymousCantUpload AnonymousOnly AutoRename BrokenClientsCompatibility CallUploadScript DisplayDotFiles IPV6Only KeepAllFiles LogPID NATmode PAMAuthentication UnixAuthentication VerboseLog
 
 RUN mkdir /etc-start/ \
-	&& mv /etc/pure-ftpd /etc-start && mkdir /etc/pure-ftpd
+	&& cp -r /etc/pure-ftpd /etc-start
+
+RUN ( echo $FTP_PASSWORD ; echo $FTP_PASSWORD ) | pure-pw useradd $FTP_USER -u ftpuser -d /home/ftpusers
 
 # startup
 COPY entrypoint.sh /entrypoint.sh
